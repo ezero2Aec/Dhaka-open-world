@@ -33,3 +33,4 @@ godot_project/.godot/
 .cache/
 node_modules/
 .DS_Store
+context.backup/
