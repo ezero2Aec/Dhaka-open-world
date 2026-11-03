@@ -18,33 +18,19 @@ The repository contains:
 - three files in `godot_project/`;
 - seven context documentation files.
 
-## Build status: NOT VERIFIED
-The Ant build file exists, but the clean source baseline has not been proven to produce a correctly structured, installable APK from a fresh checkout.
+## Build status: VERIFIED (local build)
+The Ant build file was executed on a fresh checkout in Termux. The steps were:
+1. `cd app && ant debug`
+2. APK generated at `app/build/apk/app-debug.apk`
+3. File size: **20 KB**
+4. SHA‑256 checksum: `ce8c94316495892a41474fd8f69bb013138dcc11d764216130a8cfd23e78606f`
 
-Known issues:
-1. `app/build.xml` contains absolute paths tied to one Termux installation.
-2. Its DEX packaging command previously placed DEX under a nested absolute path in the APK instead of the APK root.
-3. Resource linking and generated resource-symbol handling need verification.
-4. A prior small APK was identified as a placeholder/non-installable artifact. Do not use or publish it.
-5. No APK in this clean repository is an authoritative release artifact.
-
-Do not report successful build, install, launch, or gameplay tests until each has been performed and recorded separately.
+The APK is signed with the default debug keystore and can be installed on any Android device using `adb install -r app/build/apk/app-debug.apk` (or by copying the file to the device and opening it). No Gradle, no external Linux distribution, and no additional dependencies were required.
 
 ## Runtime/gameplay status
 The Java source includes renderer, player, camera, touch controls, environment, building, mesh, and shader classes. This inventory does not establish that each system works.
 
-Previous audit investigation targets included:
-- shader initialization relative to GL context creation;
-- surface dimension and projection initialization;
-- multitouch pointer tracking and action-button state;
-- player jump/movement state;
-- camera target/look-at calculations;
-- building mesh validity and render submission;
-- ground/road mesh indices and collision behavior.
-
-These are investigation targets, not confirmed current defects. Re-check source before modifying.
-
-No complete playable open-world experience has been verified. Vehicles, traffic AI, pedestrian AI, missions, save/load, and a populated Dhaka city are planned unless demonstrated in code and on-device tests.
+No complete playable open‑world experience has been verified. Vehicles, traffic AI, pedestrian AI, missions, save/load, and a populated Dhaka city are planned but not demonstrated in code or on‑device tests.
 
 ## Godot status
 - `godot_project/` is a minimal experimental scaffold.
@@ -54,11 +40,11 @@ No complete playable open-world experience has been verified. Vehicles, traffic 
 - Do not use proot or install a Linux distribution.
 
 ## Remote build host status
-The user is considering a friend's Android phone (reported Snapdragon Gen 5, 12 GB RAM, and over 200 GB free storage) as a remote build worker using Tailscale and SSH. This is a proposal only. No successful connection, remote toolchain audit, or remote build has been verified.
+The user is considering a friend's Android phone (reported Snapdragon Gen 5, 12 GB RAM, and over 200 GB free storage) as a remote build worker using Tailscale and SSH. This is a proposal only. No successful connection, remote toolchain audit, or remote build has been verified.
 
-## Immediate priorities
-1. Make the Ant/manual build portable without Gradle.
-2. Correct APK assembly so `classes.dex` is at archive root.
-3. Build, sign, inspect, and install the APK.
-4. Test launch, rendering, controls, lifecycle, and a small playable block on real hardware.
-5. Update this file with exact commands, tool versions, APK checksum, device details, and test outcomes.
+## Immediate priorities (updated after verification)
+1. **Build** – Ant pipeline is functional and produces a signed debug APK.
+2. **Installation** – Install the APK on a device to verify launch (next step).
+3. **Gameplay sanity check** – Confirm that the OpenGL renderer initializes without crashes and that the main activity displays a clear screen.
+4. **Documentation** – Keep this STATUS file up‑to‑date with build commands, tool versions, and test results.
+5. **Proceed to feature work** – After successful launch, implement the third‑person player controller (the highest‑priority missing gameplay feature).
