@@ -1,41 +1,33 @@
-# GitHub Publication
+# GitHub Repository and Collaboration
 
-## Repository
-Name: Dhaka-Open-World
+## Canonical repository
+- Repository: https://github.com/ezero2Aec/Dhaka-open-world
+- Default branch: `main`
+- Clean-source baseline: `2cdacf2` — `Initial clean source release`
 
-The repository does not exist yet.
+The repository already exists. Do not create a second repository or recreate it.
 
-The agent must create it using the authenticated GitHub account.
+## Repository contents
+The clean repository contains Android Java/OpenGL ES source, Android resources and manifest, the Ant build file, the experimental Godot scaffold, README, and project documentation.
 
-## Authentication
-1. Load existing credentials from the project's .env.
-2. Use GITHUB_TOKEN and GITHUB_USERNAME if configured.
-3. Never print or expose secret values.
-4. Never commit .env.
-5. Verify authentication before repository creation.
+It intentionally excludes `.env`, credentials, signing keys, APKs, generated build output, downloaded Godot binaries, export-template archives, and caches. Do not re-add these files.
 
-## Repository Setup
-- Create a new repository named Dhaka-Open-World.
-- Use a README.
-- Add an appropriate .gitignore.
-- Preserve all existing project files.
-- Commit source code.
-- Push the main branch.
+## Git workflow
+1. Check `git status`, current branch, and `git log -5 --oneline`.
+2. Fetch and inspect remote changes before starting work.
+3. Work on `main` only when clean and synchronized, or use a short-lived feature branch for substantial changes.
+4. Never discard user changes or force-push without explicit authorization.
+5. Inspect the full diff and staged file list. Check for secrets, APKs, large files, caches, and generated outputs.
+6. Commit with a descriptive message and push to the intended branch.
+7. Report commit SHA and exact files changed.
 
-## APK Publication
-Include the APK in the GitHub project if it is below GitHub's 100 MB individual file limit.
+## Secrets and authentication
+- Never read or print secret values from `.env`.
+- Never put tokens, passwords, private keys, or keystore files in Git.
+- Use the authenticated GitHub integration or the user's secure local Git credential mechanism.
+- Never ask the user to paste a personal access token into chat or commit it to a file.
 
-If the APK exceeds that limit:
-- Upload it as a GitHub Release asset.
-- Keep the complete source code in the repository.
-- Include the release download URL in README.md.
+## APK publication
+Do not publish a placeholder or unverified APK. Before publishing, record APK filename and size, SHA-256, application ID and version, min/target SDK, signature verification, root-level `classes.dex` check, and installation/launch test results including device and Android version.
 
-## Final Report
-Provide:
-- Repository URL.
-- Source code commit hash.
-- APK download URL.
-- APK size.
-- APK SHA-256 checksum.
-- Android installation instructions.
-- Build instructions.
+Publish a verified APK as a GitHub Release asset rather than committing generated binaries to the source tree. If testing is incomplete, label the artifact experimental and state exactly what remains unverified.

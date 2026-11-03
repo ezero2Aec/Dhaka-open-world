@@ -1,65 +1,63 @@
-# Dhaka Open World — Architecture
+# Architecture
 
-## Build System
+## Active Android application
+The current Android application is a native Java project using OpenGL ES 2.0. It is not currently a Godot-exported Android application.
 
-**Gradle-Free Android Build Pipeline**
+### Runtime structure
+- `MainActivity`: Android activity and lifecycle entry point.
+- `MyGLSurfaceView`: OpenGL surface and touch-event integration.
+- `MyRenderer`: GLSurfaceView renderer adapter.
+- `GameRenderer`: game frame/update and scene rendering logic.
+- `Player`: player state, movement, and character drawing.
+- `Camera`: third-person view/projection or view-target calculations.
+- `TouchControls`: virtual joystick and action-button state.
+- `Environment`: scene/environment coordination.
+- `Building`: building geometry and rendering.
+- `Mesh`: vertex/index data and GPU drawing resources.
+- `Shader`: GLSL program compilation/linking helpers.
+- `Cube`: basic geometry/test object.
 
-- **Tool**: Apache Ant + Android SDK command-line tools
-- **Process**:
-  1. `aapt2 compile` - Compile resources to flat format
-  2. `aapt2 link` - Link resources, generate R.java
-  3. `javac` - Compile Java source code
-  4. `d8` - Convert bytecode to DEX (Android runtime)
-  5. `zip` - Package APK components
-  6. `apksigner` - Sign APK with debug key
+These are intended responsibilities inferred from source layout. Inspect implementations before assuming a method contract or feature is complete.
 
-- **Location**: `app/build.xml`
+## Android build pipeline
+The current build definition is `app/build.xml`, an Apache Ant file. The intended toolchain is:
+1. Compile Android XML resources using AAPT2.
+2. Compile Java against the selected Android SDK's `android.jar`.
+3. Package compiled classes into a JAR.
+4. Convert bytecode to DEX using D8.
+5. Link manifest and resources using AAPT2.
+6. Place `classes.dex` at the root of the APK.
+7. Sign with apksigner.
+8. Verify signature and inspect package contents.
 
-## Project Structure
+### Known build-file defects and risks
+The checked-in Ant file:
+- hard-codes SDK, keystore, and executable paths under one Termux installation;
+- embeds a debug keystore path and debug password assumptions;
+- invokes AAPT2 link with precompiled resources but does not clearly establish complete resource-symbol handling;
+- uses `jar uf` with an absolute DEX path, which previously resulted in DEX being nested under a filesystem path inside the APK instead of at the APK root;
+- has not been demonstrated to produce a valid, installable APK from a fresh checkout.
 
-```
-app/
-├── AndroidManifest.xml      # Android application manifest
-├── build.xml                # Ant build configuration
-├── build/                   # Build output
-│   ├── classes/             # Compiled Java classes
-│   └── dex/                 # DEX output (for runtime)
-└── src/main/
-    ├── java/com/example/dhaka/
-    │   └── MainActivity.java    # Main activity
-    └── res/
-        ├── layout/
-        │   └── activity_main.xml
-        └── values/
-            └── strings.xml
-```
+The Ant file is a starting point, not a validated build system. Fix these issues without Gradle. Use a packaging method that explicitly writes `classes.dex` to the archive root and verify with `unzip -l`.
 
-## Engine
+## Godot status
+`godot_project/` contains a minimal scaffold (`project.godot`, `Main.tscn`, and `Cube.gd`). It is experimental and separate from the native Java app.
 
-**Godot 4.7.2** (downloaded, pending integration)
+Downloaded Linux ARM64 Godot executables and archives were intentionally excluded from GitHub. A Linux binary is not automatically executable in Termux; do not assume compatibility. Do not install proot or a Linux distribution to run it. Do not migrate to Godot unless Android export is demonstrated under the no-Gradle/no-proot constraints and migration is explicitly approved.
 
-- Linux arm64 binary available (not functional on Termux without glibc)
-- Export templates downloaded (1.2GB)
-- Minimal Godot project created: `godot_project/`
+## Optional remote build topology
+Proposed setup:
+- controller: user's Android phone running Termux and the coding agent;
+- build worker: friend's Android phone running Termux and required Android build tools;
+- secure connectivity: Tailscale plus SSH.
 
-## Build Limitations
+This is not yet verified. Keep source in Git and use a controlled checkout/build directory on the worker. Do not share private keys, tokens, or unrestricted shell access. Validate network access, toolchain, reproducibility, and artifact transfer before relying on it.
 
-1. **d8 compilation** - DEX conversion failing on current environment
-2. **APK format** - Current APK uses classes.jar instead of classes.dex
-3. **Godot integration** - Requires full Linux environment (proot setup in progress)
-
-## Next Steps
-
-1. Complete proot + Ubuntu setup for Godot export
-2. Create proper classes.dex using d8 with correct flags
-3. Integrate Godot with Android export preset
-4. Build 3D Dhaka environment
-
-## Tools Available
-
-- aapt2 (Resource compiler/linker)
-- d8 (DEX compiler)  
-- apksigner (APK signing)
-- javac (Java compiler)
-- jar/zip (Packaging)
-- ant (Build automation)
+## Performance architecture
+- Use delta time for simulation.
+- Keep GL object creation/deletion on a valid GL context.
+- Recreate GPU resources after context loss.
+- Avoid per-frame allocations.
+- Reuse vertex/index buffers and shader programs.
+- Cull distant/off-screen objects and bound scene complexity.
+- Profile on actual Android devices; do not infer performance from source inspection.
