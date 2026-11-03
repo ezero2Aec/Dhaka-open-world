@@ -1,0 +1,35 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+local.properties
+*.keystore
+*.jks
+
+# Android build outputs
+app/build/
+build/
+.gradle/
+app/*.apk
+app/*.idsig
+app/*.jar
+app/*.class
+app/gen/
+app/flat_res/
+app/res_compiled/
+
+# Godot downloaded binaries and archives
+godot_bin/
+godot.zip
+godot_arm64.zip
+godot_export_templates.zip
+
+# Godot generated files
+godot_project/.godot/
+*.import
+
+# General
+*.log
+.cache/
+node_modules/
+.DS_Store

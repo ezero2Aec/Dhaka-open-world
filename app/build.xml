@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DhakaOpenWorld" default="debug" basedir=".">
+    <!-- Paths -->
+    <property name="sdk.dir" location="/data/data/com.termux/files/home/android-sdk" />
+<property name="keystore.path" location="/data/data/com.termux/files/home/.android/debug.keystore" />
+    <property name="android.jar" location="${sdk.dir}/platforms/android-34/android.jar" />
+    <property name="aapt2" location="/data/data/com.termux/files/usr/bin/aapt2" />
+    <property name="d8" location="/data/data/com.termux/files/usr/bin/d8" />
+    <property name="apksigner" location="/data/data/com.termux/files/usr/bin/apksigner" />
+    <property name="java.source" value="1.8" />
+    <property name="java.target" value="1.8" />
+
+    <property name="src.dir" location="src/main/java" />
+    <property name="res.dir" location="src/main/res" />
+    <property name="build.dir" location="build" />
+    <property name="gen.dir" location="${build.dir}/generated" />
+    <property name="dex.dir" location="${build.dir}/dex" />
+    <property name="apk.dir" location="${build.dir}/apk" />
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="generate-r" depends="clean">
+        <mkdir dir="${gen.dir}"/>
+        <!-- Compile each XML resource file individually and store as flat files -->
+        <apply executable="${aapt2}" parallel="false" failonerror="true">
+            <arg value="compile"/>
+            <arg value="-o"/>
+            <arg path="${gen.dir}"/>
+            <mapper type="flatten"/>
+            <srcfile/>
+            <fileset dir="${res.dir}" includes="**/*.xml"/>
+        </apply>
+    </target>
+
+    <target name="compile" depends="generate-r">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}/classes" includeantruntime="false" source="${java.source}" target="${java.target}">
+            <classpath>
+                <pathelement location="${sdk.dir}/platforms/android-34/android.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="dex" depends="compile">
+        <mkdir dir="${dex.dir}"/>
+        <!-- Package compiled classes into a jar -->
+        <jar jarfile="${build.dir}/classes.jar" basedir="${build.dir}/classes"/>
+        <!-- Run D8 to produce DEX -->
+        <exec executable="${d8}" failonerror="true">
+            <arg value="--output"/>
+            <arg path="${dex.dir}"/>
+            <arg value="--lib"/>
+            <arg path="${android.jar}"/>
+            <arg path="${build.dir}/classes.jar"/>
+        </exec>
+    </target>
+
+    <target name="package" depends="dex">
+        <mkdir dir="${apk.dir}"/>
+        <!-- Link compiled resources and manifest into an unsigned APK -->
+        <exec executable="${aapt2}" failonerror="true">
+            <arg value="link"/>
+            <arg value="-o"/>
+            <arg path="${apk.dir}/app-unsigned.apk"/>
+            <arg value="--manifest"/>
+            <arg path="${basedir}/AndroidManifest.xml"/>
+            <arg value="-I"/>
+            <arg path="${android.jar}"/>
+            <arg line="-R ${gen.dir}/layout_activity_main.xml.flat -R ${gen.dir}/values_strings.arsc.flat --auto-add-overlay"/>
+        </exec>
+        <exec executable="jar" failonerror="true">
+            <arg value="uf"/>
+            <arg path="${apk.dir}/app-unsigned.apk"/>
+            <arg value="${dex.dir}/classes.dex"/>
+        </exec>
+    </target>
+
+    <target name="sign" depends="package">
+        <exec executable="${apksigner}" failonerror="true">
+            <arg value="sign"/>
+            <arg value="--ks"/>
+            <arg value="${keystore.path}"/>
+            <arg value="--ks-pass"/>
+            <arg value="pass:android"/>
+            <arg value="--ks-key-alias"/>
+            <arg value="androiddebugkey"/>
+            <arg value="--key-pass"/>
+            <arg value="pass:android"/>
+            <arg value="${apk.dir}/app-unsigned.apk"/>
+        </exec>
+        <move file="${apk.dir}/app-unsigned.apk" tofile="${apk.dir}/app-debug.apk"/>
+    </target>
+
+    <target name="debug" depends="sign">
+        <echo message="Debug APK generated at ${apk.dir}/app-debug.apk"/>
+    </target>
+</project>

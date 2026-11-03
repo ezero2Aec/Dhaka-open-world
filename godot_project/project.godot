@@ -1,0 +1,7 @@
+[gd_resource type="ConfigFile" load_steps=2 format=2]
+
+[application]
+config/name="Dhaka Open World"
+config/description="Minimal Godot MVP"
+run/main_scene="res://Main.tscn"
+config/icon="res://icon.png"
