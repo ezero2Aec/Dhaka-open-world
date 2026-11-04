@@ -43,6 +43,17 @@ public class Environment {
         treeColorHandle = GLES20.glGetUniformLocation(treeProgram, "vColor");
     }
 
+    /** Initialise mesh objects with the default shader program.
+     * Must be called after a GL context is active (e.g. from GameRenderer.onSurfaceCreated). */
+    public void initMeshes() {
+        String vs = Shader.DEFAULT_VERTEX_SHADER;
+        String fs = Shader.DEFAULT_FRAGMENT_SHADER;
+        groundMesh.init(vs, fs);
+        roadMesh.init(vs, fs);
+        treeMesh.init(vs, fs);
+        // Buildings are empty for now.
+    }
+
     private int createShaderProgram(String vs, String fs) {
         int vShader = Shader.loadShader(GLES20.GL_VERTEX_SHADER, vs);
         int fShader = Shader.loadShader(GLES20.GL_FRAGMENT_SHADER, fs);

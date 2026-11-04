@@ -195,4 +195,10 @@ public class TouchControls {
     public boolean isCameraDrag() { return cameraDrag; }
     public float getCameraDragX() { return cameraDragX; }
     public float getCameraDragY() { return cameraDragY; }
+    /** Reset camera drag after it has been processed by the renderer. */
+    public void consumeCameraDrag() {
+        cameraDrag = false;
+        cameraDragX = 0;
+        cameraDragY = 0;
+    }
 }

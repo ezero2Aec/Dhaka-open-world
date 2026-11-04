@@ -36,6 +36,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.4f, 0.6f, 0.9f, 1f);
         // Initialize OpenGL resources that require a valid context.
         environment.initGLResources();
+        // Initialise meshes now that a GL context exists.
+        player.initMeshes();
+        environment.initMeshes();
     }
     
     @Override
@@ -64,6 +67,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         
         if (touchControls.getJumpPressed()) {
             player.jump();
+        }
+        
+        // Apply camera drag rotation if any.
+        if (touchControls.isCameraDrag()) {
+            // Sensitivity factor – adjust as needed.
+            float sensitivity = 0.2f;
+            camera.addAzimuth(-touchControls.getCameraDragX() * sensitivity);
+            camera.addPitch(-touchControls.getCameraDragY() * sensitivity);
+            touchControls.consumeCameraDrag();
         }
         
         camera.setTarget(player.getX(), player.getY() + player.getHeight() * 0.5f, player.getZ());

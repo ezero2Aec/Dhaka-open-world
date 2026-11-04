@@ -2,7 +2,7 @@
 <project name="DhakaOpenWorld" default="debug" basedir=".">
     <!-- Paths -->
     <property name="sdk.dir" location="/data/data/com.termux/files/home/android-sdk" />
-<property name="keystore.path" location="/data/data/com.termux/files/home/.android/debug.keystore" />
+    <property name="keystore.path" location="/data/data/com.termux/files/home/.android/debug.keystore" />
     <property name="android.jar" location="${sdk.dir}/platforms/android-34/android.jar" />
     <property name="aapt2" location="/data/data/com.termux/files/usr/bin/aapt2" />
     <property name="d8" location="/data/data/com.termux/files/usr/bin/d8" />
@@ -70,10 +70,13 @@
             <arg path="${android.jar}"/>
             <arg line="-R ${gen.dir}/layout_activity_main.xml.flat -R ${gen.dir}/values_strings.arsc.flat --auto-add-overlay"/>
         </exec>
+        <!-- Add the compiled DEX file at the root of the APK (not under a folder) -->
         <exec executable="jar" failonerror="true">
             <arg value="uf"/>
             <arg path="${apk.dir}/app-unsigned.apk"/>
-            <arg value="${dex.dir}/classes.dex"/>
+            <arg value="-C"/>
+            <arg path="${dex.dir}"/>
+            <arg value="classes.dex"/>
         </exec>
     </target>
 

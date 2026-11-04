@@ -46,7 +46,20 @@ public class Player {
         
         Matrix.setIdentityM(normalMatrix, 0);
     }
-    
+
+    /** Initialise mesh objects with the default shader program.
+     * Must be called after a valid GL context is available (e.g. from GameRenderer.onSurfaceCreated). */
+    public void initMeshes() {
+        String vs = Shader.DEFAULT_VERTEX_SHADER;
+        String fs = Shader.DEFAULT_FRAGMENT_SHADER;
+        bodyMesh.init(vs, fs);
+        headMesh.init(vs, fs);
+        armMeshes[0].init(vs, fs);
+        armMeshes[1].init(vs, fs);
+        legMeshes[0].init(vs, fs);
+        legMeshes[1].init(vs, fs);
+    }
+
     public void update(float dt, float moveX, float moveY, boolean running) {
         isRunning = running;
         speed = isRunning ? runSpeed : 0.1f;
@@ -121,13 +134,14 @@ public class Player {
         legMeshes[1].draw(mvpMatrix, normalMatrix, new float[]{0.2f, 0.2f, 0.3f, 1f});
     }
     
+    /** Create a simple ring mesh (capsule cross-section) with correct indices. */
     private Mesh createCapsuleMesh(float radius, float height, float segments) {
         int seg = (int) segments;
         float[] vertices = new float[seg * 3];
-        short[] indices = new short[seg * 6];
         float[] normals = new float[seg * 3];
         float[] color = new float[seg * 4];
         
+        // Generate vertices around a circle
         for (int i = 0; i < seg; i++) {
             float angle = (float) i / seg * (float) Math.PI * 2;
             int base = i * 3;
@@ -143,16 +157,19 @@ public class Player {
             color[base * 4 + 3] = 1f;
         }
         
+        // Generate indices: for each segment, create two triangles (indices count: seg * 6)
+        short[] indices = new short[seg * 6];
         int idx = 0;
         for (int i = 0; i < seg; i++) {
             int next = (i + 1) % seg;
-            int base = i * 3;
-            indices[idx++] = (short) base;
+            // First triangle
+            indices[idx++] = (short) i;
             indices[idx++] = (short) next;
+            indices[idx++] = (short) 0;
+            // Second triangle (using center)
             indices[idx++] = (short) next;
-            indices[idx++] = (short) base;
-            indices[idx++] = (short) (base + 3);
-            indices[idx++] = (short) (base + 3);
+            indices[idx++] = (short) seg;
+            indices[idx++] = (short) 0;
         }
         
         return new Mesh(vertices, normals, indices, color);

@@ -29,6 +29,11 @@ public class Camera {
         targetX = x;
         targetY = y;
         targetZ = z;
+        // Keep look‑at point synchronized with the target so the camera
+        // always points at the player centre.
+        lookAtX = targetX;
+        lookAtY = targetY;
+        lookAtZ = targetZ;
     }
     
     public void update(float aspectRatio) {
