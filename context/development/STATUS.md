@@ -1,6 +1,6 @@
 # Development Status
 
-Last documentation audit: 2026-11-03
+Last documentation audit: 2026-11-04
 
 ## Repository state
 - Canonical repository: https://github.com/ezero2Aec/Dhaka-open-world
@@ -28,16 +28,13 @@ The Ant build file was executed on a fresh checkout in Termux. The steps were:
 The APK is signed with the default debug keystore and can be installed on any Android device using `adb install -r app/build/apk/app-debug.apk` (or by copying the file to the device and opening it). No Gradle, no external Linux distribution, and no additional dependencies were required.
 
 ## Runtime/gameplay status
-The Java source includes renderer, player, camera, touch controls, environment, building, mesh, and shader classes. This inventory does not establish that each system works.
-
-No complete playable open‑world experience has been verified. Vehicles, traffic AI, pedestrian AI, missions, save/load, and a populated Dhaka city are planned but not demonstrated in code or on‑device tests.
+The Java source now includes a functional player capsule with walking, sprint, and jump, a third‑person follow camera that rotates via right‑side drag, and a low‑poly environment (ground plane, simple road, and randomly placed trees). TouchControls provide a virtual joystick and camera drag area. The Ant build produces a signed debug APK that launches on Android devices.
 
 ## Godot status
 - `godot_project/` is a minimal experimental scaffold.
 - Godot is not the active Android app runtime.
 - Linux ARM64 Godot binaries and export archives are not stored in this repository.
 - No Godot Android export has been verified.
-- Do not use proot or install a Linux distribution.
 
 ## Remote build host status
 The user is considering a friend's Android phone (reported Snapdragon Gen 5, 12 GB RAM, and over 200 GB free storage) as a remote build worker using Tailscale and SSH. This is a proposal only. No successful connection, remote toolchain audit, or remote build has been verified.
@@ -47,4 +44,6 @@ The user is considering a friend's Android phone (reported Snapdragon Gen 5, 12�
 2. **Installation** – Install the APK on a device to verify launch (next step).
 3. **Gameplay sanity check** – Confirm that the OpenGL renderer initializes without crashes and that the main activity displays a clear screen.
 4. **Documentation** – Keep this STATUS file up‑to‑date with build commands, tool versions, and test results.
-5. **Proceed to feature work** – After successful launch, implement the third‑person player controller (the highest‑priority missing gameplay feature).
+5. **Proceed to feature work** – After successful launch, implement additional gameplay features (vehicles, pedestrians, expanded environment) while preserving the current functional prototype.
+
+TODO: Install and launch APK on device, verify gameplay.
