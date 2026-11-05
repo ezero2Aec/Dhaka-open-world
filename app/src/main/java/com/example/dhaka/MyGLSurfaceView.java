@@ -8,7 +8,7 @@ import android.view.View;
 public class MyGLSurfaceView extends GLSurfaceView {
     private final GameRenderer renderer;
     private int screenWidth, screenHeight;
-    
+
     public MyGLSurfaceView(Context context) {
         super(context);
         setEGLContextClientVersion(2);
@@ -27,7 +27,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         });
         setKeepScreenOn(true);
     }
-    
+
     public void updateSize(int width, int height) {
         screenWidth = width;
         screenHeight = height;

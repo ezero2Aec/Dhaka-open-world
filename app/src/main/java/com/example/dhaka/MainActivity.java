@@ -6,18 +6,18 @@ import android.view.WindowManager;
 
 public class MainActivity extends Activity {
     private MyGLSurfaceView glView;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
+
         glView = new MyGLSurfaceView(this);
         setContentView(glView);
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
             glView.onPause();
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();

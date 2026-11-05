@@ -9,7 +9,7 @@ public class Shader {
         GLES20.glCompileShader(shader);
         return shader;
     }
-    
+
     public static final String DEFAULT_VERTEX_SHADER =
         "uniform mat4 uMVPMatrix;" +
         "uniform mat4 uNormalMatrix;" +
@@ -25,7 +25,7 @@ public class Shader {
         "    vColor = vec4(1.0);" +
         "  }" +
         "}";
-    
+
     public static final String DEFAULT_FRAGMENT_SHADER =
         "precision mediump float;" +
         "varying vec4 vColor;" +

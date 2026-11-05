@@ -1,0 +1,31 @@
+# Loop Design Review – 2023‑11‑03
+
+## Progress since previous review
+- Added functional player capsule, third‑person camera, joystick, and low‑poly environment (ground, road, trees).
+- Updated `STATUS.md` to reflect build success and runtime status.
+- Modified `Camera.java`, `Environment.java`, `GameRenderer.java`, `Player.java`, `TouchControls.java`.
+- Build with Ant succeeds, producing a 20 KB debug APK.
+- Uncommitted changes are present (see `git status`).
+
+## Problems & Risks
+1. **APK packaging bug** – `classes.dex` is stored inside the APK at a deep absolute path (`data/.../app/build/dex/classes.dex`). Android will not find the DEX, causing launch failures.
+2. **Uncommitted source changes** – All code modifications are still staged only; they are not validated by CI or a human review.
+3. **No device installation test** – The APK has not been installed or launched on a device, so runtime correctness is unverified.
+4. **Potential duplicate work** – The same files have been edited multiple times without a clear task list; risk of regressions.
+5. **Lack of explicit exit condition for the loop** – The autonomous loop currently has no clear “done” predicate; it will keep running even after a successful build.
+
+## Prioritized Corrections
+1. **Fix APK packaging** – Update `app/build.xml` to add `classes.dex` at the APK root (use `-C ${dex.dir} classes.dex` or copy the DEX to a temporary file before `jar uf`).
+2. **Commit and push pending changes** – Run `git add -A`, `git commit -m "auto: implement core gameplay loop"`, `git push origin main` after the packaging fix.
+3. **Validate on device** – Install the newly built APK on a connected Android device (`adb install -r app/build/apk/app-debug.apk`) and confirm the app launches and the player can move.
+4. **Update loop exit condition** – Define a machine‑verifiable goal, e.g., "APK installs and launches without crash"; the loop should stop after the first successful verification.
+5. **Document task list** – Add a short TODO list in `context/development/STATUS.md` to avoid duplicated effort.
+
+## Recommended Next Development Tasks
+- **Task 1:** Edit `app/build.xml` to correct the DEX inclusion and test the build again.
+- **Task 2:** Commit the corrected build script and all source changes.
+- **Task 3:** Perform device installation test and record the result in `STATUS.md`.
+- **Task 4:** Extend the environment with a few low‑poly buildings and sidewalks (still using procedural geometry).
+- **Task 5:** Refine player physics (smooth acceleration, proper collision with ground).
+
+*Do not claim any of the above tasks are completed until the device test passes and the APK is verified.*
