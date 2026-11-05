@@ -50,6 +50,8 @@ public class Player {
     private final float[] normalMatrix = new float[16];
 
     public Player() {
+        // Position getters added later
+    }
         // Build 3D character mesh
         headMesh = createHeadMesh();
         torsoMesh = createTorsoMesh();
@@ -218,6 +220,17 @@ public class Player {
     }
 
     // ========== MESH CREATION METHODS ==========
+    // ======== POSITION GETTERS AND COLLISION ========
+    public float getX() { return x; }
+    public float getZ() { return z; }
+    public float getHeight() { return height; }
+    public float getCollisionRadius() { return 0.3f; }
+    // Simple setter for collision rollback
+    public void setPosition(float x, float z) {
+        this.x = x;
+        this.z = z;
+    }
+
 
     /** Create a sphere-like head mesh */
     private Mesh createHeadMesh() {

@@ -63,8 +63,17 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         float aspect = (float) screenWidth / screenHeight;
 
         // Update player
+        // Store previous position for collision rollback
+        float prevX = player.getX();
+        float prevZ = player.getZ();
         player.update(deltaTime, touchControls.getMoveX(), touchControls.getMoveY(),
             touchControls.isRunPressed());
+        // Simple collision with houses
+        if (environment.collides(player.getX(), player.getZ(), player.getCollisionRadius())) {
+            // revert to previous safe position
+            // (Assume Player has setters or we can directly set fields via reflection – we add simple setter methods)
+            player.setPosition(prevX, prevZ);
+        }
 
         // Handle jump
         if (touchControls.isJumpPressed()) {

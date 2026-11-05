@@ -1,6 +1,9 @@
 package com.example.dhaka;
 
 import android.opengl.GLES20;
+import com.example.dhaka.Building;
+import java.util.ArrayList;
+import java.util.List;
 import android.opengl.Matrix;
 
 public class Environment {
@@ -9,8 +12,8 @@ public class Environment {
 
     private final Mesh groundMesh;
     private final Mesh roadMesh;
-    private final Mesh buildingMesh;
-    private float[] buildingPositions;
+    private final java.util.List<Building> houses = new java.util.ArrayList<>();
+    // No separate building positions; using Building objects list
 
     private int groundProgram;
     private int roadProgram;
@@ -22,8 +25,14 @@ public class Environment {
     public Environment() {
         groundMesh = createGroundMesh(200, 40);
         roadMesh = createRoadMesh(200, 40);
-        buildingMesh = createBuildingMesh();
-        buildingPositions = createBuildingPositions();
+        // Create houses in a compact neighborhood
+        // Road runs horizontally (Z axis). Houses on both sides.
+        // Left side houses (negative X)
+        houses.add(new Building(-8f, 0f, -5f, 4f, 6f, 4f, new float[]{0.7f, 0.6f, 0.5f, 1f}));
+        houses.add(new Building(-8f, 0f, 5f, 4f, 6f, 4f, new float[]{0.7f, 0.6f, 0.5f, 1f}));
+        // Right side houses (positive X)
+        houses.add(new Building(8f, 0f, -5f, 4f, 6f, 4f, new float[]{0.6f, 0.5f, 0.7f, 1f}));
+        houses.add(new Building(8f, 0f, 5f, 4f, 6f, 4f, new float[]{0.6f, 0.5f, 0.7f, 1f}));
     }
 
     public void initGLResources() {
@@ -169,13 +178,21 @@ public class Environment {
         roadMesh.draw(vpMatrix, null, roadColor);
 
         GLES20.glUseProgram(buildingProgram);
-        for (int i = 0; i < 20; i++) {
-            float[] model = new float[16];
-            Matrix.setIdentityM(model, 0);
-            Matrix.translateM(model, 0, buildingPositions[i * 2], 0, buildingPositions[i * 2 + 1]);
-            float[] mvp = new float[16];
-            Matrix.multiplyMM(mvp, 0, vpMatrix, 0, model, 0);
-            buildingMesh.draw(mvp, null, groundColor);
+        // Draw houses
+        for (Building house : houses) {
+            house.draw(vpMatrix);
         }
+    }
+
+    /**
+     * Simple collision test against all houses.
+     */
+    public boolean collides(float x, float z, float radius) {
+        for (Building house : houses) {
+            if (house.contains(x, z, radius)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
