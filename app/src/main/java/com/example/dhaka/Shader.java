@@ -14,14 +14,16 @@ public class Shader {
         "uniform mat4 uMVPMatrix;" +
         "uniform vec4 vColor;" +
         "attribute vec4 vPosition;" +
+        "varying vec4 vColorOut;" +
         "void main() {" +
         "  gl_Position = uMVPMatrix * vPosition;" +
+        "  vColorOut = vColor;" +
         "}";
 
     public static final String DEFAULT_FRAGMENT_SHADER =
         "precision mediump float;" +
-        "varying vec4 vColor;" +
+        "varying vec4 vColorOut;" +
         "void main() {" +
-        "  gl_FragColor = vColor;" +
+        "  gl_FragColor = vColorOut;" +
         "}";
 }

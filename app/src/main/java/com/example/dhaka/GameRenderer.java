@@ -3,6 +3,7 @@ package com.example.dhaka;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import com.example.dhaka.player.PlayerControls;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -11,6 +12,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private final Player player;
     private final Environment environment;
     private final TouchControls touchControls;
+    private final PlayerControls playerControls;
     private int screenWidth, screenHeight;
 
     private float[] mVPMatrix = new float[16];
@@ -32,6 +34,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         player = new Player();
         environment = new Environment();
         touchControls = new TouchControls(this.screenWidth, this.screenHeight);
+        playerControls = new PlayerControls(this.screenWidth, this.screenHeight);
         lastFrameTime = System.currentTimeMillis();
     }
 
@@ -66,8 +69,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         // Store previous position for collision rollback
         float prevX = player.getX();
         float prevZ = player.getZ();
-        player.update(deltaTime, touchControls.getMoveX(), touchControls.getMoveY(),
-            touchControls.isRunPressed());
+        player.update(deltaTime, playerControls.getMoveX(), playerControls.getMoveY(),
+            playerControls.isRunPressed());
         // Simple collision with houses
         if (environment.collides(player.getX(), player.getZ(), player.getCollisionRadius())) {
             // revert to previous safe position
@@ -76,7 +79,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         // Handle jump
-        if (touchControls.isJumpPressed()) {
+        if (playerControls.isJumpPressed()) {
             player.jump();
         }
 
@@ -107,6 +110,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     }
 
     public boolean onTouchEvent(int action, int id, float x, float y) {
-        return touchControls.onTouchEvent(action, id, x, y);
+        boolean handled = false;
+        handled |= playerControls.onTouchEvent(action, id, x, y);
+        handled |= touchControls.onTouchEvent(action, id, x, y);
+        return handled;
     }
 }
