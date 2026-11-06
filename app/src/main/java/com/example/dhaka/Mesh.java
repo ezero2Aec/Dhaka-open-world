@@ -75,7 +75,9 @@ public class Mesh {
         if (normalBuffer != null) {
             GLES20.glEnableVertexAttribArray(normalHandle);
             GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, normalBuffer);
-            GLES20.glUniformMatrix4fv(normalMatrixHandle, 1, false, normalMatrix, 0);
+            if (normalMatrix != null) {
+                GLES20.glUniformMatrix4fv(normalMatrixHandle, 1, false, normalMatrix, 0);
+            }
         }
 
         if (color != null) {

@@ -220,53 +220,90 @@ public class Player {
     // ========== MESH CREATION METHODS ==========
 
     /** Create a sphere-like head mesh */
+        /** Create a UV sphere head mesh */
     private Mesh createHeadMesh() {
-        int rings = 8, sectors = 12;
-        int vertexCount = (rings + 1) * sectors;
+        // Parameters for sphere
+        int rings = 8;   // latitude divisions
+        int sectors = 8; // longitude divisions
+        float radius = 0.5f;
+
+        // Compute vertex count and allocate buffers
+        int vertexCount = (rings + 1) * (sectors + 1);
         float[] vertices = new float[vertexCount * 3];
         float[] normals = new float[vertexCount * 3];
         float[] colors = new float[vertexCount * 4];
-        short[] indices = new short[rings * sectors * 6];
 
-        int v = 0, i = 0;
+        // Generate vertices, normals, and colors
+        int v = 0;
         for (int r = 0; r <= rings; r++) {
-            float ringAngle = (float) r / rings * (float) Math.PI;
-            float sinRing = (float) Math.sin(ringAngle);
-            float cosRing = (float) Math.cos(ringAngle);
-            for (int s = 0; s < sectors; s++) {
-                float sectorAngle = (float) s / sectors * (float) Math.PI * 2;
-                int base = v * 3;
-                vertices[base] = sinRing * (float) Math.cos(sectorAngle);
-                vertices[base + 1] = cosRing;
-                vertices[base + 2] = sinRing * (float) Math.sin(sectorAngle);
-                normals[base] = vertices[base];
-                normals[base + 1] = vertices[base + 1];
-                normals[base + 2] = vertices[base + 2];
-                // Skin color with slight variation
-                colors[base * 4] = 0.85f + (float) Math.random() * 0.05f;
-                colors[base * 4 + 1] = 0.7f;
-                colors[base * 4 + 2] = 0.6f;
-                colors[base * 4 + 3] = 1f;
-                v++;
+            float phi = (float) Math.PI * r / rings; // 0 .. PI
+            float y = (float) Math.cos(phi) * radius;
+            float sinPhi = (float) Math.sin(phi);
+            for (int s = 0; s <= sectors; s++) {
+                float theta = (float) (2 * Math.PI) * s / sectors; // 0 .. 2PI
+                float x = (float) Math.cos(theta) * sinPhi * radius;
+                float z = (float) Math.sin(theta) * sinPhi * radius;
+
+                // Position
+                vertices[v] = x;
+                vertices[v + 1] = y;
+                vertices[v + 2] = z;
+
+                // Normal (unit vector)
+                float len = (float) Math.sqrt(x * x + y * y + z * z);
+                normals[v] = x / len;
+                normals[v + 1] = y / len;
+                normals[v + 2] = z / len;
+
+                // Color (skin tone)
+                int c = v / 3 * 4;
+                colors[c] = 0.85f;
+                colors[c + 1] = 0.7f;
+                colors[c + 2] = 0.6f;
+                colors[c + 3] = 1f;
+
+                v += 3;
             }
         }
 
+        // Compute index count and allocate buffer
+        int indexCount = rings * sectors * 6; // 2 triangles per quad
+        short[] indices = new short[indexCount];
+        int i = 0;
         for (int r = 0; r < rings; r++) {
             for (int s = 0; s < sectors; s++) {
-                int nextS = (s + 1) % sectors;
-                int v1 = r * sectors + s;
-                int v2 = r * sectors + nextS;
-                int v3 = (r + 1) * sectors + nextS;
-                int v4 = (r + 1) * sectors + s;
-                int base = i * 6;
-                indices[base] = (short) v1;
-                indices[base + 1] = (short) v2;
-                indices[base + 2] = (short) v3;
-                indices[base + 3] = (short) v1;
-                indices[base + 4] = (short) v3;
-                indices[base + 5] = (short) v4;
-                i++;
+                short cur = (short) (r * (sectors + 1) + s);
+                short next = (short) (cur + sectors + 1);
+
+                // First triangle of quad
+                indices[i++] = cur;
+                indices[i++] = (short) (cur + 1);
+                indices[i++] = next;
+
+                // Second triangle of quad
+                indices[i++] = (short) (cur + 1);
+                indices[i++] = (short) (next + 1);
+                indices[i++] = next;
             }
+        }
+
+        // Defensive validation
+        if (indices.length % 3 != 0) {
+            throw new RuntimeException("Index count not divisible by 3: " + indices.length);
+        }
+        for (short idx : indices) {
+            if (idx < 0 || idx >= vertexCount) {
+                throw new RuntimeException("Index out of bounds: " + idx + " (vertexCount=" + vertexCount + ")");
+            }
+        }
+        if (vertices.length != vertexCount * 3) {
+            throw new RuntimeException("Vertex buffer size mismatch");
+        }
+        if (normals.length != vertexCount * 3) {
+            throw new RuntimeException("Normal buffer size mismatch");
+        }
+        if (colors.length != vertexCount * 4) {
+            throw new RuntimeException("Color buffer size mismatch");
         }
 
         return new Mesh(vertices, normals, indices, colors);
@@ -328,42 +365,66 @@ public class Player {
         return new Mesh(vertices, normals, indices, colors);
     }
 
-    /** Create a cylinder arm mesh */
-    private Mesh createArmMesh(float radius, float height) {
-        int segments = 10;
-        float[] vertices = new float[segments * 3];
-        float[] normals = new float[segments * 3];
-        float[] colors = new float[segments * 4];
-
-        for (int i = 0; i < segments; i++) {
-            float angle = (float) i / segments * (float) Math.PI * 2;
-            int base = i * 3;
-            vertices[base] = (float) Math.cos(angle) * radius;
-            vertices[base + 1] = 0;
-            vertices[base + 2] = (float) Math.sin(angle) * radius;
-            normals[base] = vertices[base];
-            normals[base + 1] = 0;
-            normals[base + 2] = vertices[base + 2];
-            colors[base * 4] = 0.2f;
-            colors[base * 4 + 1] = 0.6f;
-            colors[base * 4 + 2] = 0.9f;
-            colors[base * 4 + 3] = 1f;
+    /**
+     * Create a simple box mesh used for arms, legs and shoes.
+     * @param w width (x dimension)
+     * @param h height (y dimension)
+     * @param d depth (z dimension)
+     * @param color RGBA color array (length 4)
+     */
+    private Mesh createBoxMesh(float w, float h, float d, float[] color) {
+        // 24 vertices (4 per face) same layout as torso
+        float[] vertices = {
+            // Front face
+            -w/2, 0, d/2, w/2, 0, d/2, w/2, h, d/2, -w/2, h, d/2,
+            // Back face
+            -w/2, 0, -d/2, w/2, 0, -d/2, w/2, h, -d/2, -w/2, h, -d/2,
+            // Top face
+            -w/2, h, -d/2, w/2, h, -d/2, w/2, h, d/2, -w/2, h, d/2,
+            // Bottom face
+            -w/2, 0, d/2, w/2, 0, d/2, w/2, 0, -d/2, -w/2, 0, -d/2,
+            // Left face
+            -w/2, 0, d/2, -w/2, 0, -d/2, -w/2, h, -d/2, -w/2, h, d/2,
+            // Right face
+            w/2, 0, -d/2, w/2, 0, d/2, w/2, h, d/2, w/2, h, -d/2
+        };
+        short[] indices = {
+            0, 1, 2, 0, 2, 3,
+            4, 5, 6, 4, 6, 7,
+            8, 9, 10, 8, 10, 11,
+            12, 13, 14, 12, 14, 15,
+            16, 17, 18, 16, 18, 19,
+            20, 21, 22, 20, 22, 23
+        };
+        float[] normals = {
+            // Front
+            0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+            // Back
+            0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+            // Top
+            0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+            // Bottom
+            0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+            // Left
+            -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+            // Right
+            1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0
+        };
+        float[] colors = new float[24 * 4];
+        for (int i = 0; i < 24; i++) {
+            colors[i * 4] = color[0];
+            colors[i * 4 + 1] = color[1];
+            colors[i * 4 + 2] = color[2];
+            colors[i * 4 + 3] = color[3];
         }
-
-        short[] indices = new short[segments * 6];
-        int idx = 0;
-        for (int i = 0; i < segments; i++) {
-            int next = (i + 1) % segments;
-            int base = i * 3;
-            indices[idx++] = (short) base;
-            indices[idx++] = (short) next;
-            indices[idx++] = (short) (base + 3);
-            indices[idx++] = (short) (base + 3);
-            indices[idx++] = (short) next;
-            indices[idx++] = (short) (next + 3);
-        }
-
         return new Mesh(vertices, normals, indices, colors);
+    }
+
+    /** Create a cylinder arm mesh */
+        private Mesh createArmMesh(float width, float height) {
+        // Use a simple box for the arm
+        float depth = width; // make it a cube-like shape
+        return createBoxMesh(width, height, depth, new float[]{0.2f, 0.6f, 0.9f, 1f});
     }
 
     /** Create a simple hand mesh */
@@ -378,41 +439,10 @@ public class Player {
     }
 
     /** Create a cylinder leg mesh */
-    private Mesh createLegMesh(float radius, float height) {
-        int segments = 8;
-        float[] vertices = new float[segments * 3];
-        float[] normals = new float[segments * 3];
-        float[] colors = new float[segments * 4];
-
-        for (int i = 0; i < segments; i++) {
-            float angle = (float) i / segments * (float) Math.PI * 2;
-            int base = i * 3;
-            vertices[base] = (float) Math.cos(angle) * radius;
-            vertices[base + 1] = 0;
-            vertices[base + 2] = (float) Math.sin(angle) * radius;
-            normals[base] = vertices[base];
-            normals[base + 1] = 0;
-            normals[base + 2] = vertices[base + 2];
-            colors[base * 4] = 0.3f;
-            colors[base * 4 + 1] = 0.25f;
-            colors[base * 4 + 2] = 0.2f;
-            colors[base * 4 + 3] = 1f;
-        }
-
-        short[] indices = new short[segments * 6];
-        int idx = 0;
-        for (int i = 0; i < segments; i++) {
-            int next = (i + 1) % segments;
-            int base = i * 3;
-            indices[idx++] = (short) base;
-            indices[idx++] = (short) next;
-            indices[idx++] = (short) (base + 3);
-            indices[idx++] = (short) (base + 3);
-            indices[idx++] = (short) next;
-            indices[idx++] = (short) (next + 3);
-        }
-
-        return new Mesh(vertices, normals, indices, colors);
+    private Mesh createLegMesh(float width, float height) {
+        // Use a simple box for the leg
+        float depth = width; // make it a cube-like shape
+        return createBoxMesh(width, height, depth, new float[]{0.3f, 0.25f, 0.2f, 1f});
     }
 
     /** Create a simple shoe mesh */

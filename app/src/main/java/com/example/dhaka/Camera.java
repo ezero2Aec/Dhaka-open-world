@@ -54,11 +54,10 @@ public class Camera {
         float ratio = aspectRatio;
         float near = 0.1f;
         float far = 100f;
-        float left = -ratio * far * 0.05f;
-        float right = ratio * far * 0.05f;
-        float bottom = -far * 0.05f;
-        float top = far * 0.05f;
-
+        float top = (float) (Math.tan(Math.toRadians(45.0) / 2) * near);
+        float bottom = -top;
+        float right = top * aspectRatio;
+        float left = -right;
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
         Matrix.multiplyMM(mVpMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
